@@ -1,6 +1,6 @@
 # odoo_rest_ov
 
-![odoo_rest_ov banner](https://raw.githubusercontent.com/nexxa-group/odoo_rest_ov/main/doc/banner.png)
+![odoo_rest_ov banner](https://raw.githubusercontent.com/osamaAlhalabi2/odoo_rest_ov/main/doc/banner.png)
 
 [![pub package](https://img.shields.io/pub/v/odoo_rest_ov.svg)](https://pub.dev/packages/odoo_rest_ov)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -401,9 +401,9 @@ client.setApiKey('your-api-key-here');
 ## Additional Resources
 
 - [API Reference](https://pub.dev/documentation/odoo_rest_ov/latest/)
-- [GitHub Repository](https://github.com/nexxa-group/odoo_rest_ov)
-- [Issue Tracker](https://github.com/nexxa-group/odoo_rest_ov/issues)
-- [Changelog](https://github.com/nexxa-group/odoo_rest_ov/blob/main/CHANGELOG.md)
+- [GitHub Repository](https://github.com/osamaAlhalabi2/odoo_rest_ov)
+- [Issue Tracker](https://github.com/osamaAlhalabi2/odoo_rest_ov/issues)
+- [Changelog](https://github.com/osamaAlhalabi2/odoo_rest_ov/blob/main/CHANGELOG.md)
 
 ---
 

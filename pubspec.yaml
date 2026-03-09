@@ -1,9 +1,9 @@
 name: odoo_rest_ov
 description: A Dart package for interacting with Odoo servers via JSON-RPC 2.0. Provides typed ORM methods, a fluent domain builder, session management, and more.
 version: 0.1.0
-homepage: https://github.com/nexxa-group/odoo_rest_ov
-repository: https://github.com/nexxa-group/odoo_rest_ov
-issue_tracker: https://github.com/nexxa-group/odoo_rest_ov/issues
+homepage: https://github.com/osamaAlhalabi2/odoo_rest_ov
+repository: https://github.com/osamaAlhalabi2/odoo_rest_ov
+issue_tracker: https://github.com/osamaAlhalabi2/odoo_rest_ov/issues
 topics:
   - odoo
   - json-rpc
