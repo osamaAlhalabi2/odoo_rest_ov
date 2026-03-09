@@ -4,25 +4,55 @@
 
 [![pub package](https://img.shields.io/pub/v/odoo_rest_ov.svg)](https://pub.dev/packages/odoo_rest_ov)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Dart 3+](https://img.shields.io/badge/Dart-3%2B-0175C2.svg?logo=dart)](https://dart.dev)
+[![Odoo 14+](https://img.shields.io/badge/Odoo-14%2B-714B67.svg?logo=odoo&logoColor=white)](https://www.odoo.com)
+[![style: lints](https://img.shields.io/badge/style-lints-4BC0F5.svg)](https://pub.dev/packages/lints)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20macOS%20%7C%20Linux%20%7C%20Windows-brightgreen.svg)](https://pub.dev/packages/odoo_rest_ov)
 
-A Dart package for interacting with Odoo servers via **JSON-RPC 2.0**. Provides typed ORM methods, a fluent domain builder, session management, error handling with user-friendly messages, and more.
+**Connect your Dart or Flutter app to Odoo without losing your mind.**
 
-**Works on Android, iOS, Web, macOS, Linux, and Windows.**
+Tired of wrapping JSON-RPC envelopes by hand, parsing cryptic error responses, and writing the same `callKw` boilerplate in every project? Yeah, us too. That's why this package exists.
+
+`odoo_rest_ov` gives you typed ORM methods, a fluent domain builder, session management, report downloads, binary field handling, and error messages you can actually show to users — all in a single import.
+
+---
+
+## Demo
+
+<!-- Replace with your actual demo GIF -->
+<p align="center">
+  <img src="https://raw.githubusercontent.com/osamaAlhalabi2/odoo_rest_ov/main/doc/demo.gif" alt="odoo_rest_ov demo" width="300" />
+</p>
+
+> *Demo app built with Flutter + odoo_rest_ov. Source available in the [playground repo](https://github.com/osamaAlhalabi2/odoo_rest_ov).*
+
+---
+
+## Why This Package?
+
+| What you get | What you'd do without it |
+|---|---|
+| `client.searchRead(...)` | Build JSON-RPC envelope, post it, extract result, cast types |
+| `OdooDomain().where('name').ilike('%test%')` | `[['name', 'ilike', '%test%']]` and hope you didn't typo an operator |
+| `catch OdooValidationException` | `catch (e)` and pray the message makes sense |
+| `session.timezone` auto-detected | Every date shows in UTC and your users are confused |
+| `client.getReport(...)` | Manual HTTP call to a URL you found on a forum post from 2019 |
 
 ---
 
 ## Features
 
-- **Simple ORM methods** — `searchRead`, `create`, `write`, `unlink`, and more
-- **Fluent domain builder** — type-safe filter construction
-- **Typed exceptions** — mapped from Odoo error types with clean user-facing messages
-- **Session management** — login, logout, session stream, auto-refresh
-- **Timezone auto-detection** — fixes the common timezone mismatch issue
-- **User type detection** — internal, portal, or public user
-- **Controller calls** — call any Odoo endpoint (JSON-RPC or REST)
-- **Report download** — PDF and other report formats
-- **Binary fields** — upload/download attachments
-- **Flutter helpers** — persistent cookie jar for mobile apps
+- **Typed ORM methods** — `searchRead`, `create`, `write`, `unlink`, `fieldsGet`, `nameSearch`, and more. No more `callKw` wrappers.
+- **Fluent domain builder** — Stop writing raw lists. Build filters with `.where('field').equals(value)`.
+- **Typed exceptions** — Odoo errors mapped to specific exception classes with user-friendly messages safe for your UI.
+- **Session management** — Login, logout, session stream, auto-refresh. Plug into Riverpod/Bloc/whatever.
+- **Timezone auto-detection** — Reads the user's timezone from their Odoo profile. Dates just work.
+- **User type detection** — Know if the user is internal, portal, or public. Check admin/system status.
+- **Controller calls** — Hit any Odoo endpoint. JSON-RPC or REST. Custom routes included.
+- **Report download** — PDF invoices in one method call.
+- **Binary fields** — Upload photos, download attachments. No base64 gymnastics.
+- **Flutter helpers** — Persistent cookies for mobile. Browser handles web automatically.
+- **Cross-platform** — Android, iOS, Web, macOS, Linux, Windows. Pure Dart core.
 
 ---
 
@@ -69,14 +99,16 @@ for (final p in partners) {
 client.close();
 ```
 
+That's it. No JSON-RPC envelopes. No result extraction. No manual error parsing.
+
 ---
 
 ## Domain Builder
 
-Build Odoo domains with a fluent, type-safe API instead of raw lists:
+Writing raw domain lists is fine... until you mistype `'ilike'` as `'ilke'` and spend 20 minutes debugging.
 
 ```dart
-// Simple conditions (AND by default)
+// Fluent and type-safe
 final domain = OdooDomain()
     .where('is_company').equals(true)
     .where('customer_rank').greaterThan(0)
@@ -96,7 +128,8 @@ final notDomain = OdooDomain()
     .build();
 ```
 
-**Available operators:**
+<details>
+<summary><strong>All available operators</strong></summary>
 
 | Method | Odoo Operator |
 |--------|--------------|
@@ -117,16 +150,19 @@ final notDomain = OdooDomain()
 | `isSet()` | `!=` false |
 | `isNotSet()` | `=` false |
 
-Raw lists still work for backward compatibility:
+</details>
+
+Raw lists still work. You don't have to rewrite existing code:
 
 ```dart
-final raw = [['name', 'ilike', 'test'], ['active', '=', true]];
-await client.searchRead('res.partner', raw);
+await client.searchRead('res.partner', [['name', 'ilike', 'test']]);
 ```
 
 ---
 
 ## ORM Methods
+
+Everything you need, typed and ready:
 
 ```dart
 // Search & Read
@@ -143,7 +179,7 @@ final partners = await client.read('res.partner', [1, 2, 3],
 // Count
 final total = await client.searchCount('res.partner', domain);
 
-// Create
+// Create — returns the new ID
 final newId = await client.create('res.partner', {
   'name': 'New Partner',
   'email': 'new@example.com',
@@ -162,7 +198,7 @@ final fields = await client.fieldsGet('res.partner',
 // Name search
 final results = await client.nameSearch('res.partner', 'Admin');
 
-// Any model method
+// Any custom model method
 final result = await client.callMethod('res.partner', 'my_method',
     args: [1], kwargs: {'key': 'value'});
 ```
@@ -171,7 +207,7 @@ final result = await client.callMethod('res.partner', 'my_method',
 
 ## Record Helpers
 
-Records come with convenient extension methods:
+Odoo records come as `Map<String, dynamic>`. These extensions make them less painful:
 
 ```dart
 final partner = partners.first;
@@ -179,8 +215,8 @@ final partner = partners.first;
 partner.id;                          // int
 partner.name;                        // String
 partner['email'];                    // dynamic field access
-partner.many2oneId('country_id');    // int? — related record ID
-partner.many2oneName('country_id');  // String? — related record name
+partner.many2oneId('country_id');    // int? — extracts the ID
+partner.many2oneName('country_id');  // String? — extracts the display name
 partner.x2manyIds('tag_ids');        // List<int> — many2many IDs
 ```
 
@@ -188,7 +224,9 @@ partner.x2manyIds('tag_ids');        // List<int> — many2many IDs
 
 ## Error Handling
 
-Errors are auto-mapped to typed exceptions with **user-friendly messages** (safe for UI display):
+Odoo error messages are... not great for users. This package fixes that.
+
+Errors are auto-mapped to typed exceptions with **user-friendly messages** you can safely display in your UI:
 
 ```dart
 try {
@@ -209,35 +247,37 @@ try {
 
 ```
 OdooException (base)
-├── OdooAccessDeniedException     — invalid credentials
-├── OdooSessionExpiredException   — session no longer valid
-├── OdooAccessErrorException      — permission denied
-├── OdooValidationException       — validation failed
-├── OdooMissingErrorException     — record not found
-├── OdooUserErrorException        — business logic error
-├── OdooNetworkException          — connectivity issues
-└── OdooProtocolException         — malformed response
++-- OdooAccessDeniedException     // wrong credentials
++-- OdooSessionExpiredException   // session gone
++-- OdooAccessErrorException      // no permission
++-- OdooValidationException       // validation failed
++-- OdooMissingErrorException     // record not found
++-- OdooUserErrorException        // business logic error
++-- OdooNetworkException          // no internet, timeout, etc.
++-- OdooProtocolException         // response doesn't make sense
 ```
 
 ---
 
 ## Session Management
 
+Sessions that manage themselves:
+
 ```dart
-// Check session validity (non-throwing)
+// Check validity (non-throwing)
 final isValid = await client.checkSession();
 
 // Refresh session data
 final updated = await client.refreshSession();
 
-// Listen to session changes
+// Listen to changes — plug into your state management
 client.sessionStream.listen((session) {
   if (session == null) {
-    // Navigate to login screen
+    // Navigate to login
   }
 });
 
-// Session callback (set in options)
+// Callback style
 OdooClientOptions(
   baseUrl: '...',
   database: '...',
@@ -252,38 +292,32 @@ await client.logout();
 
 ---
 
-## User Type Detection
+## User Type & Timezone
 
 ```dart
 final session = await client.authenticate('admin', 'admin');
 
+// User type
 session.userType;        // OdooUserType.internal
 session.isInternalUser;  // true
 session.isPortalUser;    // false
 session.isPublic;        // false
 session.isAdmin;         // true
-session.isSystem;        // true
-```
 
----
+// Timezone — auto-detected from user's Odoo settings
+session.timezone;        // "Asia/Damascus"
 
-## Timezone Handling
-
-Timezone is **auto-detected** from the user's Odoo settings after login — no manual fix needed:
-
-```dart
-final session = await client.authenticate('admin', 'admin');
-print(session.timezone); // "Asia/Damascus"
-
-// Override if needed (e.g. device timezone)
+// Override if needed
 client.setTimezone('America/New_York');
 ```
+
+No more dates showing in UTC because someone forgot to send the timezone context.
 
 ---
 
 ## Controller Calls
 
-Call any Odoo endpoint — JSON-RPC or REST:
+Call any Odoo endpoint — not just ORM methods:
 
 ```dart
 // JSON-RPC endpoint (auto-wrapped)
@@ -291,9 +325,9 @@ final resp = await client.callController(
   '/web/webclient/version_info',
   params: {},
 );
-print(resp.data);          // response data
-print(resp.statusCode);    // 200
-print(resp.isSuccess);     // true
+print(resp.data);        // response data
+print(resp.statusCode);  // 200
+print(resp.isSuccess);   // true
 
 // REST-style GET
 final rest = await client.callController(
@@ -302,7 +336,6 @@ final rest = await client.callController(
   params: {'limit': '10'},
   isJsonRpc: false,
 );
-print(rest.dataAsList);
 ```
 
 ---
@@ -312,8 +345,7 @@ print(rest.dataAsList);
 ```dart
 // Download PDF report
 final pdfBytes = await client.getReport(
-  'account.report_invoice',
-  [invoiceId],
+  'account.report_invoice', [invoiceId],
 );
 
 // Upload attachment
@@ -328,11 +360,13 @@ final bytes = await client.downloadBinary(
 );
 ```
 
+No manual base64. No guessing the endpoint.
+
 ---
 
 ## Flutter Setup
 
-For persistent sessions across app restarts, use the Flutter helper:
+For persistent sessions across app restarts:
 
 ```dart
 import 'package:odoo_rest_ov/odoo_rest_ov_flutter.dart';
@@ -346,45 +380,15 @@ final client = OdooFlutter.createClient(
 );
 ```
 
-> **Note:** The Flutter helper uses `PersistCookieJar` for disk-based cookie storage.
-> On web, cookies are managed by the browser automatically — no extra setup needed.
-
----
-
-## Web Support
-
-The package works on web out of the box. The browser handles cookies automatically with `withCredentials: true`. No `cookie_jar` setup is needed for web.
-
-```dart
-// Same API on web — no special configuration
-final client = OdooClient(OdooClientOptions(
-  baseUrl: 'https://mycompany.odoo.com',
-  database: 'mydb',
-));
-
-await client.authenticate('admin', 'admin');
-```
+On web, cookies are managed by the browser automatically. Same code, zero config.
 
 > **CORS note:** Your Odoo server must allow cross-origin requests from your web app's domain.
 
 ---
 
-## Platform Support
-
-| Platform | Status | Notes |
-|----------|--------|-------|
-| Android  | Supported | Cookie persistence via `OdooFlutter` |
-| iOS      | Supported | Cookie persistence via `OdooFlutter` |
-| Web      | Supported | Browser-managed cookies |
-| macOS    | Supported | — |
-| Linux    | Supported | — |
-| Windows  | Supported | — |
-
----
-
 ## API Key Authentication
 
-For Odoo 14+ API key authentication:
+For Odoo 14+ API key auth (no login needed):
 
 ```dart
 final client = OdooClient(OdooClientOptions(
@@ -393,12 +397,31 @@ final client = OdooClient(OdooClientOptions(
 ));
 
 client.setApiKey('your-api-key-here');
-// Now use ORM methods directly — no authenticate() needed
+// Use ORM methods directly — no authenticate() call needed
 ```
 
 ---
 
-## Additional Resources
+## Platform Support
+
+| Platform | Status | Notes |
+|----------|--------|-------|
+| Android | Supported | Cookie persistence via `OdooFlutter` |
+| iOS | Supported | Cookie persistence via `OdooFlutter` |
+| Web | Supported | Browser-managed cookies |
+| macOS | Supported | Pure Dart |
+| Linux | Supported | Pure Dart |
+| Windows | Supported | Pure Dart |
+
+---
+
+## Odoo Version Support
+
+Tested with **Odoo 14, 15, 16, 17, 18, and 19**. If Odoo speaks JSON-RPC 2.0, this package speaks back.
+
+---
+
+## Resources
 
 - [API Reference](https://pub.dev/documentation/odoo_rest_ov/latest/)
 - [GitHub Repository](https://github.com/osamaAlhalabi2/odoo_rest_ov)
@@ -410,3 +433,9 @@ client.setApiKey('your-api-key-here');
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">
+  Built by <strong>Osama Al-Halabi</strong>
+</p>
